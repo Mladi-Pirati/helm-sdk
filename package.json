@@ -1,11 +1,28 @@
 {
-  "name": "helm-sdk",
-  "module": "index.ts",
+  "name": "@mp/helm-sdk",
+  "version": "0.1.0",
   "type": "module",
-  "devDependencies": {
-    "@types/bun": "latest"
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
   },
-  "peerDependencies": {
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "prepare": "bun run build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^3"
+  },
+  "devDependencies": {
+    "tsup": "^8",
     "typescript": "^5"
   }
 }
