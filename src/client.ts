@@ -24,11 +24,11 @@ export interface SdkConfig {
    * Custom fetch implementation. Defaults to globalThis.fetch.
    * In RN/Expo: pass `fetch` from `react-native-nitro-fetch`.
    */
-  fetch?: typeof globalThis.fetch;
+  fetch?: typeof fetch;
 }
 
 export function createClient(config: SdkConfig) {
-  const fetchImpl = config.fetch ?? globalThis.fetch;
+  const fetchImpl = config.fetch ?? fetch;
 
   async function request<T>(
     endpoint: string,
