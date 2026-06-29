@@ -1,7 +1,14 @@
 import { SdkError, SdkParseError } from "./errors";
 import { USER_ROUTES } from "./modules/user/user.routes";
-import { HelmUserSchema } from "./modules/user/user.schemas";
-import type { HelmUser } from "./modules/user/user.types";
+import {
+  HelmMembersPageSchema,
+  HelmUserSchema,
+} from "./modules/user/user.schemas";
+import type {
+  HelmMember,
+  HelmMembersPage,
+  HelmUser,
+} from "./modules/user/user.types";
 
 export interface SdkConfig {
   /**
@@ -27,8 +34,57 @@ export interface SdkConfig {
   fetch?: typeof fetch;
 }
 
+export interface HelmMembersListParams {
+  cursor?: string;
+  limit?: number;
+  q?: string;
+  status?: "active" | "disabled" | "all";
+  roleId?: string | string[];
+  sort?: "name-asc" | "name-desc";
+}
+
 export function createClient(config: SdkConfig) {
   const fetchImpl = config.fetch ?? fetch;
+
+  function buildMembersEndpoint(params?: HelmMembersListParams) {
+    const query = new URLSearchParams();
+
+    if (params?.cursor !== undefined) {
+      query.set("cursor", params.cursor);
+    }
+
+    if (params?.limit !== undefined) {
+      query.set("limit", String(params.limit));
+    }
+
+    if (params?.q !== undefined) {
+      query.set("q", params.q);
+    }
+
+    if (params?.status !== undefined) {
+      query.set("status", params.status);
+    }
+
+    if (params?.roleId !== undefined) {
+      const roleIds = Array.isArray(params.roleId)
+        ? params.roleId
+        : [params.roleId];
+
+      for (const roleId of roleIds) {
+        query.append("roleId", roleId);
+      }
+    }
+
+    if (params?.sort !== undefined) {
+      query.set("sort", params.sort);
+    }
+
+    const queryString = query.toString();
+
+    return queryString
+      ? `${USER_ROUTES.members}?${queryString}`
+      : USER_ROUTES.members;
+  }
 
   async function request<T>(
     endpoint: string,
@@ -71,6 +127,30 @@ export function createClient(config: SdkConfig) {
   return {
     user: {
       me: (): Promise<HelmUser> => request(USER_ROUTES.me, HelmUserSchema),
+      members: {
+        list: (params?: HelmMembersListParams): Promise<HelmMembersPage> =>
+          request(buildMembersEndpoint(params), HelmMembersPageSchema),
+        paginate: async function* (
+          params?: HelmMembersListParams
+        ): AsyncGenerator<HelmMember[]> {
+          let cursor = params?.cursor;
+
+          while (true) {
+            const page = await request(
+              buildMembersEndpoint({ ...params, cursor }),
+              HelmMembersPageSchema
+            );
+
+            yield page.rows;
+
+            if (page.nextCursor === null) {
+              return;
+            }
+
+            cursor = page.nextCursor;
+          }
+        },
+      },
     },
   };
 }

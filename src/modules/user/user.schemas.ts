@@ -35,6 +35,18 @@ export const HelmApplicationSchema = z.object({
   keycloakClientId: z.string(),
 });
 
+export const HelmMemberSchema = z.object({
+  id: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
+  username: z.string(),
+});
+
+export const HelmMembersPageSchema = z.object({
+  rows: z.array(HelmMemberSchema),
+  nextCursor: z.string().nullable(),
+});
+
 export const HelmUserSchema = z.object({
   id: z.string(),
   firstName: z.string(),

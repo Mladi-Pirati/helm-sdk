@@ -10,6 +10,8 @@ export {
   HelmMembershipSchema,
   HelmRoleSchema,
   HelmApplicationSchema,
+  HelmMemberSchema,
+  HelmMembersPageSchema,
 } from "./modules/user/user.schemas";
 export type {
   HelmUser,
@@ -18,6 +20,8 @@ export type {
   HelmMembership,
   HelmRole,
   HelmApplication,
+  HelmMember,
+  HelmMembersPage,
 } from "./modules/user/user.types";
 
 export { SdkError, SdkParseError } from "./errors";
